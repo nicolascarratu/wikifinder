@@ -117,8 +117,8 @@ let url_wiki_2 = ''
 let url_test_1 = ''
 let url_test_2 = ''
 
-let url_test = 'http://en.wikipedia.org/w/api.php?action=query&format=json&origin=*&prop=categories&clcategories=Category:All%20disambiguation%20pages&titles='
-let url_base = 'http://en.wikipedia.org/w/api.php?action=query&format=json&origin=*&prop=extracts&explaintext&exsectionformat=wiki&titles='
+let url_test = 'https://en.wikipedia.org/w/api.php?action=query&format=json&origin=*&prop=categories&clcategories=Category:All%20disambiguation%20pages&titles='
+let url_base = 'https://en.wikipedia.org/w/api.php?action=query&format=json&origin=*&prop=extracts&explaintext&exsectionformat=wiki&titles='
 
 let flag = true
 
