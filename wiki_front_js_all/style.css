@@ -1,0 +1,108 @@
+html{
+    min-height: 100vh;
+    min-width: 100vw
+
+}
+
+body{
+    height: 100vh;
+    
+    margin: 0;
+}
+
+/* *{
+    box-sizing: border-box;
+} */
+
+#particles-js {
+    position: fixed;
+    /*  relative to be able to interact */
+    width: 100vw;
+    height: 100vh;  
+    /*  object-fit: contain;  */
+    display: block;
+    filter: blur(17px);
+    background-color: rgb(246, 241, 249);
+    /* background-repeat: no-repeat; */
+    background-size: cover;
+    background-position: 50% 50%; 
+    z-index: 1;
+
+}
+
+.cuerpo {
+    position: relative;
+    z-index: 5;
+
+}
+
+
+.back-color {
+    height: 100%;
+    width: 100%;
+    background-color: rgb(246, 241, 249);
+    z-index: 1;
+}
+
+.delay-progress {
+    width: 0%;
+    transition-property: width;
+    transition-duration: 1.5s;
+}
+
+.titulo {
+    color: #2c1950;
+    font-weight: 350
+}
+
+.parrafo {
+    color: rgb(87, 43, 168);
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    font-weight: 100;
+    font-size: larger;
+    font-style: italic
+}
+
+.form {
+    border-radius: .25rem;
+    padding: 0.5vh;
+    color: #141218;
+    background-color: #39099162;
+    border-color: #25183e;
+}
+
+.form:focus {
+    appearance: none;
+    border-color: #25183e;
+    outline: none
+}
+
+.form::placeholder {
+    color: #141218e2;
+}
+
+.title {
+    font-family: 'sans-serif';
+    font-size: clamp(40px, 15vw, 120px);
+    color: #492983cf;
+    font-stretch: ultra-expanded;
+}
+
+.boton {
+    display: none;
+}
+
+#barra {
+    position: static;
+    bottom: 10px;
+}
+
+.final {
+    position: fixed;
+    bottom: 10px;
+}
+
+
+#datos_err {
+    min-height: 55px;
+}
