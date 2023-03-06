@@ -63,7 +63,7 @@ let particulas = {
             out_mode: "bounce",
             bounce: false,
             attract: {
-                enable: true,
+                enable: false,
                 rotateX: 600,
                 rotateY: 1200
             }
@@ -114,15 +114,12 @@ let particulas = {
 let url_wiki_1 = ''
 let url_wiki_2 = ''
 
-let url_test_1 = ''
-let url_test_2 = ''
-
-let url_test = 'https://en.wikipedia.org/w/api.php?action=query&format=json&origin=*&prop=categories&clcategories=Category:All%20disambiguation%20pages&titles='
+let url_link = 'https://en.wikipedia.org/?curid='
 let url_base = 'https://en.wikipedia.org/w/api.php?action=query&format=json&origin=*&prop=extracts&explaintext&exsectionformat=wiki&titles='
 
-let flag = true
+let flag = false
 
-var form = document.getElementById('form')
+let form = document.getElementById('form')
 let progressBar = document.getElementById('progreso')
 let busqueda_1 = document.getElementById('busqueda_1')
 let busqueda_2 = document.getElementById('busqueda_2')
@@ -135,7 +132,7 @@ let error = []
 let clean_text = []
 let seccion = []
 let frases = []
-
+let id = []
 let disambiguation = ''
 let desambiguada = false
 
@@ -143,7 +140,8 @@ function testAndSearch(infoWiki, art, word) {
     if (infoWiki[-1] == undefined) {
         inputLimpio(infoWiki)
         if (desambiguacionTest(clean_text, art)) {
-            findWord(clean_text, word.value)
+            findWord(clean_text, word.value, art.value)
+            id.push(Object.keys(infoWiki))
         }
         else {
             desambiguada = true
@@ -152,31 +150,38 @@ function testAndSearch(infoWiki, art, word) {
     }
     else {
         let err = 'El articulo ' + art.value + ' no se ha encontrado.'
+        document.getElementById('boton_1').style.display = 'none'
+        document.getElementById('boton_2').style.display = 'none'
         error.push(err)
     }
 }
 
 document.addEventListener('DOMContentLoaded', () => {
+    flag = false
+    formInput()
+    limpiar()
     particlesJS('particles-js', particulas, function () {
         console.log('callback - particles.js config loaded');
     });
     progressBar.style.width = '0%'
 
     document.getElementById('boton').addEventListener('click', () => {
+        flag = true
         reseteo()
         progressBar.style.width = '25%'
-        document.getElementById('datos_err').innerHTML = ''
 
         if (tomarDatos()) {
             allinonce().then(() => {
                 testAndSearch(infoWiki_1, busqueda_1, busqueda_2)
                 testAndSearch(infoWiki_2, busqueda_2, busqueda_1)
+
                 if (!desambiguada) {
                     mostrarDatos(seccion, frases, error);
                 }
-                else{
+                else {
                     let error = boots_err + `${disambiguation}</div>`
                     document.getElementById('datos_err').innerHTML = error
+                    progressBar.style.width = '0%'
                 }
 
             })
@@ -187,25 +192,62 @@ document.addEventListener('DOMContentLoaded', () => {
     })
 
 
-    document.getElementById('form').addEventListener('input', () => {
-        document.getElementById('datos_1').innerHTML = 'Aquí se buscará el articulo ' + showInput1() + ' en el articulo ' + showInput2()
-        document.getElementById('title_1').innerHTML = busqueda_1.value != '' ? busqueda_1.value : 'Articulo 1'
-    })
-    document.getElementById('form').addEventListener('input', () => {
-        document.getElementById('datos_2').innerHTML = 'Aquí se buscará el articulo ' + showInput2() + ' en el articulo ' + showInput1()
-        document.getElementById('title_2').innerHTML = busqueda_2.value != '' ? busqueda_2.value : 'Articulo 2'
-
-    })
-
 })
+
+function limpiar() {
+    document.getElementById('limpieza').addEventListener('click', () => {
+
+        busqueda_1.value = ''
+        busqueda_2.value = ''
+
+        id = []
+
+        document.getElementById('datos_1').innerHTML = ''
+        document.getElementById('datos_2').innerHTML = ''
+
+        document.getElementById('title_1').innerHTML = 'Articulo 1'
+        document.getElementById('title_2').innerHTML = 'Articulo 2'
+
+        document.getElementById('boton_1').style.display = 'none'
+        document.getElementById('boton_2').style.display = 'none'
+
+        progressBar.style.width = '0%'
+
+    })
+}
+
+function formInput() {
+
+    document.getElementById('form').addEventListener('input', () => {
+        if (!flag) {
+            document.getElementById('datos_1').innerHTML = 'Aquí se buscará el articulo ' + showInput1() + ' en el articulo ' + showInput2()
+            document.getElementById('title_1').innerHTML = busqueda_1.value != '' ? busqueda_1.value : 'Articulo 1'
+        }
+    })
+
+    document.getElementById('form').addEventListener('input', () => {
+        if (!flag) {
+            document.getElementById('datos_2').innerHTML = 'Aquí se buscará el articulo ' + showInput2() + ' en el articulo ' + showInput1()
+            document.getElementById('title_2').innerHTML = busqueda_2.value != '' ? busqueda_2.value : 'Articulo 2'
+
+        }
+    })
+
+}
 
 
 
 
 function reseteo() {
+    document.getElementById('datos_err').innerHTML = ''
+    url_wiki_1 = ''
+    url_wiki_2 = ''
     seccion = []
+    error = []
     frases = []
-    falg = false
+    clean_text = []
+    id = []
+    desambiguada = false
 
 }
 
@@ -246,7 +288,7 @@ function inputLimpio(input) {
     return clean_text
 }
 
-async function findWord(text, busqueda) {
+function findWord(text, busqueda, art) {
     const regex = new RegExp('(?<!\\w\\.\\w.)(?<![A-Z][a-z]\\.)(?<=\\.|\\?)\\s', 'gm')
 
     let seccion_text = ''
@@ -269,8 +311,8 @@ async function findWord(text, busqueda) {
 
         else if (text.at(-1) === sentence) {
             frases.push(false)
-            seccion.push(false)
-            error.push('No encontrada')
+            seccion.push(art)
+            error.push('No se menciona ' + busqueda + ' en este artículo.')
             return
         }
     }
@@ -298,7 +340,7 @@ async function findWord(text, busqueda) {
         console.log(frases)
         frases.push(false)
     }
-    return true
+    return 
 };
 
 
@@ -322,62 +364,31 @@ function showInput2() {
 
 function mostrarDatos(sect, frase, error) {
 
+    let section = sect
+
     for (const [index, err] of error.entries()) {
         console.log(err)
         if (err != false) {
             console.log(index)
             document.getElementById(`datos_${index + 1}`).innerHTML = err
-            progressBar.style.width = '0%'
+            document.getElementById(`title_${index + 1}`).innerHTML = section[index] != undefined ? section[index] : ''
         }
     }
-    console.log(frase)
+
     frase.forEach((phrase, index) => {
-        console.log(index)
-        let section = sect[index]
-        document.getElementById(`datos_${index + 1}`).innerHTML = phrase
-        document.getElementById(`title_${index + 1}`).innerHTML = section
-        document.getElementById(`boton_${index + 1}`).style.display = 'block'
-        /* document.getElementById(`boton_${i}`).href = url_final */
+        if (phrase != false) {
+            console.log(index)
+            document.getElementById(`datos_${index + 1}`).innerHTML = phrase
+            document.getElementById(`title_${index + 1}`).innerHTML = section[index]
+            document.getElementById(`boton_${index + 1}`).style.display = 'block'
+            document.getElementById(`boton_${index + 1}`).href = url_link + id[index]
 
-        progressBar.style.width = '100%'
+
+        }
     })
-
+    progressBar.style.width = '100%'
 }
 
-
-/* 
-    for (const x in json.datos) {
-        if (Object.hasOwnProperty.call(json.datos, x)) {
-            
-            const dato = json.datos[x];
-            i += 1
-            if ('aviso' in dato) {
-                document.getElementById(`datos_${i}`).innerHTML = dato['aviso']
-                var url = JSON.stringify(dato['url'])
-                var url_final = url.replace(/['"]+/g, '')
-                document.getElementById(`boton_${i}`).style.display = 'block'
-                document.getElementById(`boton_${i}`).href = url_final
- 
-                document.getElementById(`title_${i}`).innerHTML = ''
- 
-            }
-            else {
-                console.log()
-                var url = JSON.stringify(dato['url'])
-                var url_final = url.replace(/['"]+/g, '')
- 
-                document.getElementById(`title_${i}`).innerHTML = 'Se encontro ' + dato['word'] + ' en ' + dato['name'] + '!'
-                document.getElementById(`datos_${i}`).innerHTML = dato['texto']
-                document.getElementById(`boton_${i}`).style.display = 'block'
-                document.getElementById(`boton_${i}`).href = url_final
- 
-            }
- 
-        }
- 
-    }
- 
-    } */
 
 function tomarDatos() {
 
@@ -388,11 +399,13 @@ function tomarDatos() {
         let frase_error = 'Ingrese ambos articulos.'
         let err_vacio = boots_err + `${frase_error}</div>`
         document.getElementById('datos_err').innerHTML = err_vacio
+        progressBar.style.width = '0%'
     }
     else if (busqueda_1 == busqueda_2) {
         let frase_error = 'Ingrese articulos diferentes.'
         let err_vacio = boots_err + `${frase_error}</div>`
         document.getElementById('datos_err').innerHTML = err_vacio
+        progressBar.style.width = '0%'
     }
 
     else {
@@ -400,8 +413,6 @@ function tomarDatos() {
         url_wiki_1 = url_base + busqueda_1 + '&&redirects=yes'
         url_wiki_2 = url_base + busqueda_2 + '&&redirects=yes'
 
-        url_test_1 = url_test + busqueda_1
-        url_test_2 = url_test + busqueda_2
         return true
     }
 
