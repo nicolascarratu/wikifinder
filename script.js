@@ -135,6 +135,7 @@ let frases = []
 let id = []
 let disambiguation = ''
 let desambiguada = false
+let not_found = false
 
 function testAndSearch(infoWiki, art, word) {
     if (infoWiki[-1] == undefined) {
@@ -148,11 +149,10 @@ function testAndSearch(infoWiki, art, word) {
             return desambiguada
         }
     }
-    else {
-        let err = 'El articulo ' + art.value + ' no se ha encontrado.'
-        document.getElementById('boton_1').style.display = 'none'
-        document.getElementById('boton_2').style.display = 'none'
-        error.push(err)
+    else if (!not_found && !desambiguada) {
+        notFound(art)
+        not_found = true
+
     }
 }
 
@@ -175,28 +175,31 @@ document.addEventListener('DOMContentLoaded', () => {
                 testAndSearch(infoWiki_1, busqueda_1, busqueda_2)
                 testAndSearch(infoWiki_2, busqueda_2, busqueda_1)
 
-                if (!desambiguada) {
+                if (!desambiguada && !not_found) {
                     mostrarDatos(seccion, frases, error);
-                }
-                else {
-                    let error = boots_err + `${disambiguation}</div>`
-                    document.getElementById('datos_err').innerHTML = error
-                    progressBar.style.width = '0%'
                 }
 
             })
-
         }
-
 
     })
 
-
 })
+
+function notFound(art) {
+    let err = 'El articulo ' + art.value + ' no se ha encontrado.'
+    document.getElementById('boton_1').style.display = 'none'
+    document.getElementById('boton_2').style.display = 'none'
+    document.getElementById('datos_err').innerHTML = boots_err + `${err} </div>`
+    progressBar.style.width = '0%'
+    return true
+    
+}
 
 function limpiar() {
     document.getElementById('limpieza').addEventListener('click', () => {
 
+        flag = false
         busqueda_1.value = ''
         busqueda_2.value = ''
 
@@ -235,18 +238,14 @@ function formInput() {
 
 }
 
-
-
-
 function reseteo() {
     document.getElementById('datos_err').innerHTML = ''
-    url_wiki_1 = ''
-    url_wiki_2 = ''
     seccion = []
     error = []
     frases = []
     clean_text = []
     id = []
+    not_found = false
     desambiguada = false
 
 }
@@ -259,9 +258,17 @@ function regeX(word, str) {
 
 function desambiguacionTest(text, art) {
     let evaluate = regeX('refer to', text[0])
+    let artMayus = art.value.charAt(0).toUpperCase() + art.value.slice(1)
     console.log(evaluate)
-    if (evaluate) {
-        disambiguation = 'La pagina ' + art.value + ' tiene desambiguaciones.'
+    if (evaluate && !desambiguada && !not_found) {
+        disambiguation = 'La pagina ' + artMayus + ' tiene desambiguaciones.'
+        let error = boots_err + `${disambiguation}</div>`
+        document.getElementById('datos_err').innerHTML = error
+        progressBar.style.width = '0%'
+        return false
+    }
+
+    else if(evaluate){
         return false
     }
     return true
@@ -312,7 +319,8 @@ function findWord(text, busqueda, art) {
         else if (text.at(-1) === sentence) {
             frases.push(false)
             seccion.push(art)
-            error.push('No se menciona ' + busqueda + ' en este artículo.')
+            let busqMayus = busqueda.charAt(0).toUpperCase() + busqueda.slice(1)
+            error.push('No se menciona ' + busqMayus + ' en este artículo.')
             return
         }
     }
@@ -340,7 +348,7 @@ function findWord(text, busqueda, art) {
         console.log(frases)
         frases.push(false)
     }
-    return 
+    return
 };
 
 
@@ -372,6 +380,8 @@ function mostrarDatos(sect, frase, error) {
             console.log(index)
             document.getElementById(`datos_${index + 1}`).innerHTML = err
             document.getElementById(`title_${index + 1}`).innerHTML = section[index] != undefined ? section[index] : ''
+            document.getElementById(`boton_${index + 1}`).style.display = 'block'
+            document.getElementById(`boton_${index + 1}`).href = url_link + id[index]
         }
     }
 
